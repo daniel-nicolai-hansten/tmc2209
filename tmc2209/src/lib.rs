@@ -342,7 +342,7 @@ where
 pub fn send_read_request<R, U>(slave_addr: u8, uart_tx: &mut U) -> Result<(), U::Error>
 where
     R: reg::ReadableRegister,
-    U: hal::blocking::serial::Write<u8>,
+    U: hal::serial::Write<u8>,
 {
     let req = read_request::<R>(slave_addr);
     uart_tx.bwrite_all(req.bytes())
@@ -355,7 +355,7 @@ where
 pub fn send_write_request<R, U>(slave_addr: u8, reg: R, uart_tx: &mut U) -> Result<(), U::Error>
 where
     R: WritableRegister,
-    U: hal::blocking::serial::Write<u8>,
+    U: hal::serial::Write<u8>,
 {
     let req = write_request(slave_addr, reg);
     uart_tx.bwrite_all(req.bytes())
