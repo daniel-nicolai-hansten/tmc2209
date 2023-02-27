@@ -345,7 +345,7 @@ where
     U: hal::serial::Write<u8>,
 {
     let req = read_request::<R>(slave_addr);
-    uart_tx.bwrite_all(req.bytes())
+    uart_tx.write_all(req.bytes())
 }
 
 /// Construct a write access datagram for register `R` of the slave at the given address and
@@ -358,7 +358,7 @@ where
     U: hal::serial::Write<u8>,
 {
     let req = write_request(slave_addr, reg);
-    uart_tx.bwrite_all(req.bytes())
+    uart_tx.write_all(req.bytes())
 }
 
 /// Blocks and attempts to read a response from the given UART receiver.
