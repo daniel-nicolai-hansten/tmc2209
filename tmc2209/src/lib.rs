@@ -7,7 +7,7 @@ pub mod reg;
 
 use core::convert::TryFrom;
 use embedded_hal as hal;
-
+use nb;
 #[doc(inline)]
 pub use self::reg::{ReadableRegister, Register, WritableRegister};
 
@@ -339,28 +339,34 @@ where
 /// via UART.
 ///
 /// This simply calls `read_request` internally before writing the request via `U::bwrite_all`.
-pub fn send_read_request<R, U>(slave_addr: u8, uart_tx: &mut U) -> Result<(), U::Error>
+pub fn send_read_request<R, U>(slave_addr: u8, uart_tx: &mut U) -> nb::Result<(), U::Error>
 where
     R: reg::ReadableRegister,
     U: hal::serial::Write<u8>,
 {
     let req = read_request::<R>(slave_addr);
-    uart_tx.write(req.bytes())
+    for b in req.bytes() {
+        uart_tx.write(*b)?;
+    }
+    uart_tx.flush()
+    
 }
 
 /// Construct a write access datagram for register `R` of the slave at the given address and
 /// send it via UART.
 ///
 /// This simply calls `write_request` internally before writing the request via `U::bwrite_all`.
-pub fn send_write_request<R, U>(slave_addr: u8, reg: R, uart_tx: &mut U) -> Result<(), U::Error>
+pub fn send_write_request<R, U>(slave_addr: u8, reg: R, uart_tx: &mut U) -> nb::Result<(), U::Error>
 where
     R: WritableRegister,
     U: hal::serial::Write<u8>,
 {
     let req = write_request(slave_addr, reg);
-    uart_tx.write(req.bytes())
+    for b in req.bytes() {
+        uart_tx.write(*b)?;
+    }
+    uart_tx.flush()
 }
-
 /// Blocks and attempts to read a response from the given UART receiver.
 ///
 /// The response might be from any register, so the `reg_addr` on the returned response should be
